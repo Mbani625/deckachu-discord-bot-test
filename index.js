@@ -133,9 +133,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
         client.userCardCache.delete(interaction.user.id);
       }, 10 * 60 * 1000);
 
+      const totalPages = Math.ceil(cards.length / 25);
+      const buttonRow = getPaginationButtons(0, totalPages);
+
       await interaction.reply({
-        content: `🔍 Found cards for "${query}" in ${format}. Choose one below:`,
-        components: [row],
+        content: `🔍 Found cards for "${query}" in ${format}. Choose one below (Page 1 of ${totalPages}):`,
+        components: [row, buttonRow],
         ephemeral: true,
       });
     } catch (err) {
