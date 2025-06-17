@@ -37,7 +37,10 @@ const commands = [
         .setDescription("Card name to search for")
         .setRequired(true)
     ),
-].map((command) => command.toJSON());
+  new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("Learn how to use the bot and its commands"),
+].map((cmd) => cmd.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
@@ -131,6 +134,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
         ephemeral: true,
       });
     }
+  }
+
+  if (interaction.isChatInputCommand() && interaction.commandName === "help") {
+    return interaction.reply({
+      content: `🧠 **Bot Help**
+
+Use \`/card\` to search for a Pokémon card by name and format.
+
+**Usage:**
+\`/card format:<standard|expanded|unlimited> name:<card name>\`
+
+Example:
+\`/card format:standard name:Charizard\`
+
+You'll receive a private dropdown with matching results. Once you select one, the card image will be posted publicly in the channel.
+
+More features coming soon! 🎴`,
+      ephemeral: true,
+    });
   }
 
   // Handle card selection from dropdown
