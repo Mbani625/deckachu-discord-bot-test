@@ -79,9 +79,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
               card.regulationMark && card.regulationMark.toUpperCase() >= "G"
             );
           }
-          return card.legalities?.[format] === "Legal";
+
+          if (format === "expanded") {
+            return card.legalities?.expanded === "Legal";
+          }
+
+          if (format === "unlimited") {
+            return (
+              card.legalities?.unlimited === "Legal" ||
+              !card.legalities?.standard
+            );
+          }
+
+          return false;
         })
-        .slice(0, 25); // Discord allows max 25 options
+        .slice(0, 250);
 
       if (!cards.length) {
         return interaction.reply({
@@ -90,7 +102,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         });
       }
 
-      const options = cards.map((card, index) => ({
+      const options = cards.slice(0, 25).map((card, index) => ({
         label: `${card.name} (${card.set?.name ?? "Unknown Set"})`,
         description: `Reg: ${card.regulationMark ?? "?"} • Rarity: ${
           card.rarity ?? "Unknown"
