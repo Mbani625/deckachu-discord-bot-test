@@ -120,9 +120,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
       client.cachedCards = cards;
 
       await interaction.reply({
-        content: `🔍 Results for "${query}" in ${format}:`,
-        components: [row],
-        ephemeral: true,
+        content: `**${card.name}**\nSet: ${card.set.name}\nType: ${
+          card.supertype
+        } – ${card.subtypes?.join(", ") ?? "None"}\nRegulation Mark: ${
+          card.regulationMark ?? "Unknown"
+        }`,
+        files: [card.images.large],
+        ephemeral: false, // ✅ Public to the whole channel
       });
     } catch (err) {
       console.error(err);
