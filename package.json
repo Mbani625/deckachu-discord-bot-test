@@ -1,0 +1,25 @@
+{
+  "name": "deckachu-discord-bot-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mbani625/deckachu-discord-bot-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mbani625/deckachu-discord-bot-test/issues"
+  },
+  "homepage": "https://github.com/Mbani625/deckachu-discord-bot-test#readme",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "discord.js": "^14.20.0",
+    "dotenv": "^16.5.0"
+  }
+}
