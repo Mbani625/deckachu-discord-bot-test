@@ -120,13 +120,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
       client.cachedCards = cards;
 
       await interaction.reply({
-        content: `**${card.name}**\nSet: ${card.set.name}\nType: ${
-          card.supertype
-        } – ${card.subtypes?.join(", ") ?? "None"}\nRegulation Mark: ${
-          card.regulationMark ?? "Unknown"
-        }`,
-        files: [card.images.large],
-        ephemeral: false, // ✅ Public to the whole channel
+        content: `🔍 Found cards for "${query}" in ${format}. Choose one below:`,
+        components: [row],
+        ephemeral: true,
       });
     } catch (err) {
       console.error(err);
@@ -159,7 +155,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         card.regulationMark ?? "Unknown"
       }`,
       files: [card.images.large],
-      ephemeral: true,
+      ephemeral: false,
     });
   }
 });
