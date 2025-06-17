@@ -11,6 +11,8 @@ const {
 require("dotenv").config();
 const axios = require("axios");
 
+const { ButtonBuilder, ButtonStyle } = require("discord.js");
+
 // Set up bot client
 const client = new Client({
   intents: [
@@ -120,7 +122,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const row = new ActionRowBuilder().addComponents(selectMenu);
 
-      client.cachedCards = cards;
+      client.userCardCache = client.userCardCache || new Map();
+      client.userCardCache.set(interaction.user.id, {
+        cards,
+        page: 0,
+      });
+
+      // Auto-delete the user's cache after 10 minutes
+      setTimeout(() => {
+        client.userCardCache.delete(interaction.user.id);
+      }, 10 * 60 * 1000);
 
       await interaction.reply({
         content: `🔍 Found cards for "${query}" in ${format}. Choose one below:`,
@@ -161,7 +172,8 @@ More features coming soon! 🎴`,
     interaction.customId === "card_select"
   ) {
     const selectedIndex = parseInt(interaction.values[0], 10);
-    const card = client.cachedCards?.[selectedIndex];
+    const cache = client.userCardCache?.get(interaction.user.id);
+    const card = cache?.cards?.[selectedIndex];
 
     if (!card) {
       return interaction.reply({
@@ -180,7 +192,64 @@ More features coming soon! 🎴`,
       ephemeral: false,
     });
   }
+
+  if (interaction.isButton()) {
+    const cache = client.userCardCache.get(interaction.user.id);
+    if (!cache)
+      return interaction.reply({
+        content: "Card list expired.",
+        ephemeral: true,
+      });
+
+    let { page, cards } = cache;
+    const totalPages = Math.ceil(cards.length / 25);
+
+    if (interaction.customId === "prev_page") page--;
+    if (interaction.customId === "next_page") page++;
+
+    client.userCardCache.set(interaction.user.id, { cards, page });
+
+    const options = getCardOptions(cards, page);
+    const selectMenu = new StringSelectMenuBuilder()
+      .setCustomId("card_select")
+      .setPlaceholder("Choose a card")
+      .addOptions(options);
+
+    const menuRow = new ActionRowBuilder().addComponents(selectMenu);
+    const buttonRow = getPaginationButtons(page, totalPages);
+
+    return interaction.update({
+      content: `Page ${page + 1} of ${totalPages}:`,
+      components: [menuRow, buttonRow],
+    });
+  }
 });
+
+function getCardOptions(cards, page = 0) {
+  const start = page * 25;
+  return cards.slice(start, start + 25).map((card, index) => ({
+    label: `${card.name} (${card.set?.name ?? "Unknown Set"})`,
+    description: `Reg: ${card.regulationMark ?? "?"} • Rarity: ${
+      card.rarity ?? "Unknown"
+    }`,
+    value: (start + index).toString(),
+  }));
+}
+
+function getPaginationButtons(page, totalPages) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("prev_page")
+      .setLabel("◀ Prev")
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page === 0),
+    new ButtonBuilder()
+      .setCustomId("next_page")
+      .setLabel("Next ▶")
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page >= totalPages - 1)
+  );
+}
 
 // Login
 client.login(process.env.DISCORD_TOKEN);
